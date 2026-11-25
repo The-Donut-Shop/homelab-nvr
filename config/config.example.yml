@@ -1,0 +1,83 @@
+# Frigate config template. Copy to ${APPDATA}/frigate/config.yml.
+# Camera logins and IPs come from FRIGATE_* variables in .env (Frigate substitutes {FRIGATE_*}).
+mqtt:
+  enabled: false
+
+go2rtc:
+  streams:
+    floor1:
+      - rtsps://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM1_IP}:554/ch0_1.264#insecure
+    groundfloor:
+      - rtsps://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM2_IP}:554/ch0_1.264#insecure
+    balcony:
+      - rtsps://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM3_IP}:554/ch0_1.264#insecure
+
+ffmpeg:
+  hwaccel_args: preset-vaapi
+  output_args:
+    record: preset-record-generic
+
+detectors:
+  ov:
+    type: openvino
+    device: GPU
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+
+record:
+  enabled: true
+  motion:
+    days: 14
+  alerts:
+    retain:
+      days: 30
+  detections:
+    retain:
+      days: 14
+
+cameras:
+  floor1:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/floor1
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 800
+      height: 448
+      fps: 5
+
+  groundfloor:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/groundfloor
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 800
+      height: 448
+      fps: 5
+
+  balcony:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/balcony
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 800
+      height: 448
+      fps: 5
+version: 0.17-0
