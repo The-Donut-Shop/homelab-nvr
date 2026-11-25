@@ -81,3 +81,10 @@ cameras:
       height: 448
       fps: 5
 version: 0.17-0
+
+# lean defaults for a small host
+birdseye:
+  enabled: false   # combined live view = constant extra ffmpeg encoding
+
+telemetry:
+  version_check: false
